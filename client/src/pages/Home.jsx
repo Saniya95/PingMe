@@ -70,18 +70,18 @@ export default function Home() {
           {/* Workspace Cards */}
           <div className="workspace-section">
             <section className="workspace-grid">
-        {/* ChatGPT with provided PNG */}
-        <button className="workspace-card">
+        {/* PingMe AI */}
+        <button className="workspace-card" onClick={() => navigate('/chat/pingme')}>
           <img
             className="workspace-icon-img"
             src="/icons/ChatGPT%20Image%20Jan%2021,%202026,%2010_20_02%20PM.png"
-            alt="ChatGPT"
+            alt="PingMe AI"
           />
-          <div className="workspace-title">ChatGPT</div>
+          <div className="workspace-title">PingMe AI</div>
           <div className="workspace-desc">Design feedback and prompts</div>
         </button>
-        {/* Gemini with provided PNG (second image) */}
-        <button className="workspace-card">
+        {/* Gemini */}
+        <button className="workspace-card" onClick={() => navigate('/chat/gemini')}>
           <img
             className="workspace-icon-img"
             src="/icons/ChatGPT%20Image%20Jan%2021,%202026,%2010_17_08%20PM.png"
@@ -90,16 +90,17 @@ export default function Home() {
           <div className="workspace-title">Gemini</div>
           <div className="workspace-desc">Brainstorming ideas</div>
         </button>
-        {/* Placeholder cards to be updated later */}
-        <button className="workspace-card">
+        {/* Perplexity */}
+        <button className="workspace-card" onClick={() => navigate('/chat/perplexity')}>
           <div className="workspace-icon gradient-indigo" aria-hidden />
           <div className="workspace-title">Perplexity</div>
           <div className="workspace-desc">Ask anything and explore</div>
         </button>
-        <button className="workspace-card">
+        {/* Copilot */}
+        <button className="workspace-card" onClick={() => navigate('/chat/copilot')}>
           <div className="workspace-icon gradient-violet" aria-hidden />
-          <div className="workspace-title">Grok</div>
-          <div className="workspace-desc">Conversational AI</div>
+          <div className="workspace-title">Copilot</div>
+          <div className="workspace-desc">Your coding assistant</div>
         </button>
             </section>
           </div>

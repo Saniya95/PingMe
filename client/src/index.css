@@ -394,7 +394,6 @@ body {
   .pastel-card { width: 90%; padding: 28px; }
 }
 
-    height: 88px;
 @media (min-width: 1024px) {
   .landing-topbar {
     width: 80vw;
@@ -418,4 +417,594 @@ body {
     border-radius: 16px;
     font-size: 16px;
   }
+}
+
+/* ================================================================
+   PingMe Chat — full pastel glassmorphism chat UI
+   ================================================================ */
+
+/* ─── Page shell ─────────────────────────────────────────── */
+.pm-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  background: radial-gradient(circle at top left, #EAF3FF 0%, #F6ECFF 35%, #FFEAF4 70%, #FFFFFF 100%);
+  overflow: hidden;
+}
+
+/* ─── Sidebar ────────────────────────────────────────────── */
+.pm-sidebar {
+  width: 280px;
+  min-width: 280px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255,255,255,0.60);
+  backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(200,200,255,0.30);
+  box-shadow: 4px 0 30px rgba(180,180,255,0.12);
+  z-index: 2;
+}
+
+.pm-sidebar-head {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid rgba(200,200,255,0.20);
+}
+.pm-sidebar-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1F2937;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pm-sidebar-title::before {
+  content: '';
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #9AE6FF, #D4B3FF);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ─── Contacts list ──────────────────────────────────────── */
+.pm-contacts-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.pm-contacts-list::-webkit-scrollbar { width: 4px; }
+.pm-contacts-list::-webkit-scrollbar-thumb { background: rgba(180,180,255,0.30); border-radius: 4px; }
+
+/* Divider */
+.pm-divider {
+  padding: 10px 20px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #9CA3AF;
+  letter-spacing: 0.2px;
+}
+
+/* ─── Contact item ───────────────────────────────────────── */
+.pm-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background 180ms ease, transform 180ms ease;
+  border-radius: 0;
+  position: relative;
+}
+.pm-contact-item:hover {
+  background: rgba(200,210,255,0.25);
+}
+.pm-contact--selected {
+  background: rgba(180,200,255,0.35);
+}
+.pm-contact--selected::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, #7CA3FF, #C49BFF);
+}
+.pm-contact--decrypted {
+  animation: pmFlash 600ms ease;
+}
+@keyframes pmFlash {
+  0%   { background: rgba(160,240,200,0.40); }
+  100% { background: transparent; }
+}
+
+/* ─── Avatar ─────────────────────────────────────────────── */
+.pm-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #CCD5FF, #E8D5FF);
+  display: grid; place-items: center;
+  font-size: 15px; font-weight: 600; color: #4B5563;
+  flex-shrink: 0;
+  transition: box-shadow 300ms ease;
+  box-shadow: 0 2px 8px rgba(160,170,255,0.25);
+}
+.pm-avatar--ai {
+  background: linear-gradient(135deg, #A3F0FF, #C4ABFF);
+  font-size: 18px;
+}
+.pm-avatar--unlocked {
+  box-shadow: 0 0 0 3px rgba(80,200,130,0.4), 0 2px 8px rgba(160,170,255,0.25);
+}
+
+/* ─── Contact body ───────────────────────────────────────── */
+.pm-contact-body {
+  flex: 1;
+  min-width: 0;
+}
+.pm-contact-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pm-contact-preview {
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 2px;
+}
+.pm-lock {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.pm-contact-menu {
+  background: none; border: none;
+  font-size: 16px; color: #9CA3AF;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.pm-contact-menu:hover { background: rgba(200,200,255,0.30); }
+
+/* Badge */
+.pm-contact-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.pm-badge-ai {
+  background: linear-gradient(135deg, #A3F0FF, #C4ABFF);
+  color: #374151;
+}
+
+/* ─── Click indicator dots ───────────────────────────────── */
+.pm-click-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.pm-click-dots {
+  display: flex;
+  gap: 3px;
+}
+.pm-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(180,180,255,0.30);
+  transition: background 200ms ease, transform 200ms ease;
+}
+.pm-dot--filled {
+  background: #7C8EFF;
+  transform: scale(1.25);
+}
+.pm-click-hint {
+  font-size: 10px;
+  color: #9CA3AF;
+}
+
+/* ─── Sidebar footer ─────────────────────────────────────── */
+.pm-sidebar-foot {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(200,200,255,0.20);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.40);
+}
+.pm-foot-icon { font-size: 18px; }
+.pm-foot-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.3;
+}
+.pm-foot-text strong {
+  font-size: 12px;
+  color: #374151;
+}
+
+/* ================================================================
+   Chat window (right panel)
+   ================================================================ */
+.pm-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(12px);
+}
+
+/* ─── Chat header ────────────────────────────────────────── */
+.pm-chat-head {
+  height: 60px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(200,200,255,0.20);
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(14px);
+  flex-shrink: 0;
+}
+.pm-back-btn {
+  display: none; /* shown on mobile */
+  background: none; border: none;
+  color: #374151; cursor: pointer;
+  padding: 4px;
+}
+.pm-chat-head-info { flex: 1; }
+.pm-chat-head-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F2937;
+}
+.pm-chat-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pm-head-circle {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #CCEEFF, #E8D5FF);
+}
+.pm-head-icon {
+  background: none; border: none;
+  color: #6B7280; cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+}
+.pm-head-icon:hover { background: rgba(200,200,255,0.25); }
+
+/* ─── Messages area ──────────────────────────────────────── */
+.pm-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pm-messages::-webkit-scrollbar { width: 5px; }
+.pm-messages::-webkit-scrollbar-thumb { background: rgba(180,180,255,0.25); border-radius: 4px; }
+
+/* ─── Message row ────────────────────────────────────────── */
+.pm-msg-row {
+  display: flex;
+  animation: pmMsgIn 300ms ease both;
+}
+@keyframes pmMsgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pm-msg--left  { justify-content: flex-start; }
+.pm-msg--right { justify-content: flex-end; }
+
+/* ─── Bubble ─────────────────────────────────────────────── */
+.pm-bubble {
+  max-width: 100%;
+  padding: 10px 14px 6px;
+  border-radius: 16px;
+  position: relative;
+  word-break: break-word;
+  transition: background 400ms ease, box-shadow 400ms ease, transform 300ms ease;
+}
+.pm-bubble--other {
+  background: rgba(255,255,255,0.80);
+  border: 1px solid rgba(200,210,255,0.35);
+  box-shadow: 0 4px 16px rgba(180,180,255,0.14);
+  border-bottom-left-radius: 4px;
+}
+.pm-bubble--user {
+  background: linear-gradient(135deg, rgba(200,200,255,0.35), rgba(230,210,255,0.35));
+  border: 1px solid rgba(190,180,255,0.35);
+  box-shadow: 0 4px 16px rgba(180,180,255,0.14);
+  border-bottom-right-radius: 4px;
+}
+.pm-bubble--decrypted {
+  animation: pmDecrypt 700ms ease;
+}
+@keyframes pmDecrypt {
+  0%   { background: rgba(160,240,200,0.50); transform: scale(1.02); }
+  50%  { background: rgba(160,240,200,0.25); }
+  100% { transform: scale(1); }
+}
+
+.pm-bubble-text {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #1F2937;
+}
+.pm-bubble-text p {
+  margin: 0;
+}
+
+/* ─── Bubble meta (time + menu + lock) ───────────────────── */
+.pm-bubble-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 4px;
+}
+.pm-bubble-time {
+  font-size: 10px;
+  color: #9CA3AF;
+}
+.pm-bubble-menu {
+  background: none; border: none;
+  font-size: 16px;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 0 3px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 150ms ease, background 150ms ease;
+}
+.pm-bubble-menu:hover {
+  color: #6B7280;
+  background: rgba(200,200,255,0.25);
+}
+.pm-bubble-check {
+  color: #7C8EFF;
+  display: inline-flex;
+}
+.pm-lock-small {
+  font-size: 11px;
+}
+
+/* ─── Message click dots (inside bubble) ─────────────────── */
+.pm-msg-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  animation: pmDotPulse 300ms ease;
+}
+@keyframes pmDotPulse {
+  0%   { transform: scale(0.9); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.pm-dot-label {
+  font-size: 10px;
+  color: #9CA3AF;
+  margin-left: 4px;
+}
+
+/* ─── Typing indicator ───────────────────────────────────── */
+.pm-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 18px;
+}
+.pm-typing span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #B0B8FF;
+  animation: pmTypeDot 1.2s infinite ease-in-out;
+}
+.pm-typing span:nth-child(2) { animation-delay: 0.15s; }
+.pm-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes pmTypeDot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+
+/* ─── Suggested prompts ──────────────────────────────────── */
+.pm-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 24px 4px;
+}
+.pm-suggestion-chip {
+  font-size: 12px;
+  color: #6B7280;
+  padding: 7px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.70);
+  border: 1px solid rgba(200,210,255,0.35);
+  cursor: pointer;
+  transition: background 200ms ease, transform 180ms ease;
+  white-space: nowrap;
+}
+.pm-suggestion-chip:hover {
+  background: rgba(200,210,255,0.35);
+  transform: translateY(-1px);
+}
+
+/* ─── Input bar ──────────────────────────────────────────── */
+.pm-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px 16px;
+  background: rgba(255,255,255,0.5);
+  border-top: 1px solid rgba(200,200,255,0.18);
+}
+.pm-input {
+  flex: 1;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(200,210,255,0.35);
+  border-radius: 24px;
+  background: rgba(255,255,255,0.70);
+  font-size: 13.5px;
+  color: #1F2937;
+  outline: none;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+.pm-input::placeholder { color: #9CA3AF; }
+.pm-input:focus {
+  border-color: rgba(140,130,255,0.50);
+  box-shadow: 0 0 0 3px rgba(140,130,255,0.12);
+}
+.pm-input-icon {
+  background: none; border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+}
+.pm-input-icon:hover { color: #6B7280; background: rgba(200,200,255,0.20); }
+.pm-send-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(200,210,255,0.35);
+  color: #9CA3AF;
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease, transform 200ms ease;
+}
+.pm-send--active {
+  background: linear-gradient(135deg, #7C8EFF, #C49BFF);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(140,130,255,0.35);
+}
+.pm-send--active:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 20px rgba(140,130,255,0.45);
+}
+
+/* ─── Empty chat state ───────────────────────────────────── */
+.pm-chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #6B7280;
+}
+.pm-empty-icon { font-size: 48px; }
+.pm-chat-empty h3 { font-size: 18px; font-weight: 600; color: #374151; }
+.pm-chat-empty p  { font-size: 13px; }
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .pm-sidebar { width: 100%; min-width: 0; position: absolute; z-index: 10; }
+  .pm-back-btn { display: grid; }
+}
+
+/* ================================================================
+   Message wrapper & AI hover actions
+   ================================================================ */
+
+/* ─── Message wrapper (holds bubble + AI actions) ────────── */
+.pm-msg-wrapper {
+  max-width: 65%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── AI hover action bar ────────────────────────────────── */
+.pm-ai-actions {
+  display: flex;
+  gap: 2px;
+  padding: 4px 2px 0;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.pm-msg-row:hover .pm-ai-actions {
+  opacity: 1;
+}
+
+.pm-ai-action-btn {
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 5px 7px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  transition: color 150ms ease, background 150ms ease;
+}
+.pm-ai-action-btn:hover {
+  color: #374151;
+  background: rgba(200, 210, 255, 0.30);
+}
+.pm-ai-action-btn--danger:hover {
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* ─── Copy toast ─────────────────────────────────────────── */
+.pm-copy-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(55, 65, 81, 0.92);
+  color: #fff;
+  padding: 8px 22px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 100;
+  pointer-events: none;
+  animation: pmToastIn 250ms ease, pmToastOut 250ms ease 1.5s forwards;
+}
+@keyframes pmToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes pmToastOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ─── Chat header enhancements ───────────────────────────── */
+.pm-head-circle--ai {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.pm-head-emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+.pm-chat-head-status {
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 1px;
+  display: block;
 }
