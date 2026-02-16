@@ -6,6 +6,7 @@ import Home from "./pages/Home.jsx";
 import Signup from "./pages/Signup.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import PingMeChat from "./pages/PingMeChat.jsx";
+import VscodePage from "./pages/VscodePage.jsx";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
       <Route path="/home" element={<Home />} />
       <Route path="/chat" element={<PingMeChat />} />
       <Route path="/chat/:aiType" element={<PingMeChat />} />
+      <Route path="/vscode" element={<VscodePage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

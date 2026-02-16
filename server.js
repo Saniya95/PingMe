@@ -19,6 +19,7 @@ process.on("unhandledRejection", (reason, promise) => {
 
 const connectDB = require("./src/config/db");
 const apiRoutes = require("./src/routes");
+const { errorHandler, notFoundHandler } = require("./src/middlewares/error.middleware");
 
 console.log("🔄 Starting PingMe server...");
 console.log(`📁 NODE_ENV: ${process.env.NODE_ENV || "development"}`);
@@ -42,6 +43,12 @@ app.use(express.static(CLIENT_DIST));
 
 // Mount API routes
 app.use("/api", apiRoutes);
+
+// 404 handler for undefined API routes
+app.use("/api", notFoundHandler);
+
+// Global error handler
+app.use(errorHandler);
 
 // SPA fallback: serve index.html for non-API routes
 app.get(/^(?!\/api).*/, (_req, res) => {

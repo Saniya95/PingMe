@@ -12,7 +12,11 @@ async function connectDB() {
 	if (!uri) {
 		console.error("[DB] MONGO_URI is not set in environment variables");
 		return;
+		
 	}
+
+	console.log("🔥 Loaded MONGO_URI:", process.env.MONGO_URI);
+
 
 	try {
 		const conn = await mongoose.connect(uri);

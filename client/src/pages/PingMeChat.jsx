@@ -6,35 +6,33 @@ import ChatWindow from '../components/ChatWindow.jsx';
 import { SAMPLE_CONTACTS, AI_CONTACT, AI_TYPES } from '../utils/encryption.js';
 
 /**
- * PingMeChat \u2014 Main chat page (supports multiple AI types)
+ * PingMeChat — Main chat page (supports multiple AI types)
  *
- * Route: /chat/:aiType?   (defaults to \u2018pingme\u2019)
- *
- * Layout:
- * \u250C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
- * \u2502  Sidebar     \u2502  Chat window             \u2502
- * \u2502  (contacts)  \u2502  (messages + input)       \u2502
- * \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
- *
- * The AI type is resolved from the :aiType URL param.
- * Clicking a private contact 5 times decrypts its number/name.
- * Switching contacts auto-re-encrypts the previous one.
+ * Route: /chat/:aiType?   (defaults to 'pingme')
+ * When aiType === 'chatgpt', renders a full ChatGPT-replica UI.
  */
 export default function PingMeChat() {
   const { isAuthenticated } = useAuth();
   const { aiType } = useParams();
 
-  // Resolve AI info from route param (default to \u2018pingme\u2019)
+  // Resolve AI info from route param (default to 'pingme')
   const currentAI = AI_TYPES[aiType] || AI_TYPES.pingme;
+  const isChatGPT = currentAI.isChatGPT === true;
 
   const [selectedContact, setSelectedContact] = useState(AI_CONTACT);
   const [contactClickCounts, setContactClickCounts] = useState({});
   const [decryptedContacts, setDecryptedContacts] = useState(new Set());
 
-  /* \u2500\u2500 Guard \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  /* Chat history for ChatGPT sidebar */
+  const [chatHistories, setChatHistories] = useState([
+    { id: 1, title: 'New conversation', active: true },
+  ]);
+  const [activeChatId, setActiveChatId] = useState(1);
+
+  /* Guard */
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  /* \u2500\u2500 Re-encrypt helper \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  /* Re-encrypt helper */
   const reEncryptPrevious = (prev) => {
     if (prev && prev.id !== 'ai') {
       setDecryptedContacts((s) => {
@@ -45,35 +43,100 @@ export default function PingMeChat() {
     }
   };
 
-  /* \u2500\u2500 Contact click handler (5 = decrypt) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  /* Contact click handler (5 = decrypt) */
   const handleContactClick = (contact) => {
-    // Switching to a different contact: re-encrypt old, start count at 1
     if (selectedContact?.id !== contact.id) {
       reEncryptPrevious(selectedContact);
       setContactClickCounts((p) => ({ ...p, [contact.id]: 1 }));
       setSelectedContact(contact);
       return;
     }
-
-    // Same contact: increment click count
     const cur = contactClickCounts[contact.id] || 0;
     const next = cur + 1;
     setContactClickCounts((p) => ({ ...p, [contact.id]: next }));
-
     if (next >= 5) {
       setDecryptedContacts((p) => new Set([...p, contact.id]));
       setContactClickCounts((p) => ({ ...p, [contact.id]: 0 }));
     }
-
     setSelectedContact(contact);
   };
 
-  /* \u2500\u2500 AI click handler \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  /* AI click handler */
   const handleAIClick = () => {
     reEncryptPrevious(selectedContact);
     setSelectedContact(AI_CONTACT);
   };
 
+  /* New Chat handler for ChatGPT */
+  const handleNewChat = () => {
+    const newId = Date.now();
+    setChatHistories((prev) => [
+      { id: newId, title: 'New conversation', active: true },
+      ...prev.map((c) => ({ ...c, active: false })),
+    ]);
+    setActiveChatId(newId);
+  };
+
+  const handleSelectChat = (id) => {
+    setChatHistories((prev) =>
+      prev.map((c) => ({ ...c, active: c.id === id }))
+    );
+    setActiveChatId(id);
+  };
+
+  /* =========================================================
+     ChatGPT Mode — Full replica layout
+     ========================================================= */
+  if (isChatGPT) {
+    return (
+      <div className="gpt-page">
+        {/* Left Sidebar */}
+        <aside className="gpt-sidebar">
+          <button className="gpt-new-chat" onClick={handleNewChat}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New chat
+          </button>
+
+          <div className="gpt-history">
+            {chatHistories.map((chat) => (
+              <button
+                key={chat.id}
+                className={`gpt-history-item ${chat.active ? 'gpt-history-item--active' : ''}`}
+                onClick={() => handleSelectChat(chat.id)}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+                <span className="gpt-history-title">{chat.title}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="gpt-sidebar-footer">
+            <div className="gpt-user-pill">
+              <div className="gpt-user-avatar">U</div>
+              <span className="gpt-user-name">User</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* Right Main Chat */}
+        <ChatWindow
+          selectedContact={selectedContact}
+          isAI={true}
+          decryptedContacts={decryptedContacts}
+          aiInfo={currentAI}
+          isChatGPTMode={true}
+        />
+      </div>
+    );
+  }
+
+  /* =========================================================
+     Default Mode — Original PingMe layout
+     ========================================================= */
   return (
     <div className="pm-page">
       <ContactsSidebar

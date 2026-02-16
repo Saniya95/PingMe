@@ -100,7 +100,7 @@ SAMPLE_CONTACTS.forEach(contact => {
 export const AI_TYPES = {
   pingme:     { id: 'ai', name: 'PingMe AI',   emoji: '🤖', gradient: 'linear-gradient(135deg, #A3F0FF, #C4ABFF)' },
   gemini:     { id: 'ai', name: 'Gemini',       emoji: '✨', gradient: 'linear-gradient(135deg, #FFD6A5, #FFB7C5)' },
-  perplexity: { id: 'ai', name: 'Perplexity',   emoji: '🔍', gradient: 'linear-gradient(135deg, #C4ABFF, #9AE6FF)' },
+  chatgpt:    { id: 'ai', name: 'ChatGPT',      emoji: '🤖', gradient: 'linear-gradient(135deg, #10a37f, #1a7f64)', isChatGPT: true },
   copilot:    { id: 'ai', name: 'Copilot',      emoji: '🚀', gradient: 'linear-gradient(135deg, #A3F0C4, #9AE6FF)' },
 };
 
