@@ -5,18 +5,59 @@ import Footer from "../components/Footer.jsx";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, loading, error: authError, clearError } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) root.classList.add("dark");
     else root.classList.remove("dark");
   }, [isDark]);
+
+  // Clear errors when component mounts
+  useEffect(() => {
+    clearError();
+    setError("");
+  }, [clearError]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    clearError();
+    
+    // Frontend validation
+    if (!email || !password) {
+      setError("Email and password are required");
+      return;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      console.log('🔑 Submitting login form...', { email });
+      
+      await login({ email, password });
+      
+      console.log('✅ Login completed, redirecting to home...');
+      navigate("/home", { replace: true });
+    } catch (err) {
+      console.error('❌ Login failed:', err.message);
+      setError(err.message || "Invalid email or password. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="landing-pastel">
@@ -55,24 +96,9 @@ export default function Login() {
         <div className="login-header">
           <div id="login-title" className="login-title">Login to PingMe</div>
         </div>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setError("");
-            if (!email || !password) {
-              setError("Email and password are required");
-              return;
-            }
-            try {
-              await login({ email, password });
-              navigate("/home", { replace: true });
-            } catch (_) {
-              setError("Invalid credentials");
-            }
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           {/* Email field */}
-          <label className="login-label" htmlFor="email">Email</label>
+          <label className="login-label" htmlFor="email">Email Address</label>
           <div className="login-input">
             <span className="login-icon" aria-hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none">
@@ -80,13 +106,21 @@ export default function Login() {
                 <path d="M5 8l7 4 7-4" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" />
               </svg>
             </span>
-            <input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input 
+              id="email" 
+              type="email" 
+              placeholder="Enter your email address" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isSubmitting || loading}
+            />
           </div>
 
           {/* Password field */}
           <div className="login-row">
             <label className="login-label" htmlFor="password">Password</label>
-            <button type="button" className="forgot-link" aria-label="Forgot Password?">Forgot Password?</button>
+            <button type="button" className="forgot-link" aria-label="Forgot Password?" disabled={isSubmitting || loading}>Forgot Password?</button>
           </div>
           <div className="login-input">
             <span className="login-icon" aria-hidden>
@@ -95,8 +129,16 @@ export default function Login() {
                 <rect x="5" y="10" width="14" height="9" rx="2" stroke="#6B7280" strokeWidth="1.2" />
               </svg>
             </span>
-            <input id="password" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <button type="button" className="visibility-toggle" aria-label="Toggle visibility" onClick={() => setShowPassword(v => !v)}>
+            <input 
+              id="password" 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Enter your password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isSubmitting || loading}
+            />
+            <button type="button" className="visibility-toggle" aria-label="Toggle visibility" onClick={() => setShowPassword(v => !v)} disabled={isSubmitting || loading}>
               {showPassword ? (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none">
                   <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" stroke="#6B7280" strokeWidth="1.3" />
@@ -111,11 +153,27 @@ export default function Login() {
             </button>
           </div>
 
-          {error && (
-            <div className="login-error" role="alert">{error}</div>
+          {(error || authError) && (
+            <div className="login-error" role="alert">
+              {error || authError}
+            </div>
           )}
+          
           {/* Login CTA */}
-          <button className="login-btn" type="submit">Login</button>
+          <button 
+            className="login-btn" 
+            type="submit"
+            disabled={isSubmitting || loading || !email || !password}
+          >
+            {isSubmitting || loading ? (
+              <>
+                <span className="loading-spinner" aria-hidden>⟳</span>
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
+          </button>
 
           {/* Card footer text */}
           <div className="login-card-footer">

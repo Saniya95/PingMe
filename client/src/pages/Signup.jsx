@@ -5,16 +5,16 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, loading, error: authError, clearError } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -22,22 +22,53 @@ export default function Signup() {
     else root.classList.remove("dark");
   }, [isDark]);
 
+  // Clear errors when component mounts
+  useEffect(() => {
+    clearError();
+    setError("");
+  }, [clearError]);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    clearError();
+    
+    // Frontend validation
     if (!name || !email || !password || !confirm) {
       setError("All fields are required");
       return;
     }
+    
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    
     if (password !== confirm) {
       setError("Passwords do not match");
       return;
     }
+    
+    // Email validation
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     try {
-      await register({ name, email, phone, password });
+      setIsSubmitting(true);
+      console.log('📝 Submitting registration form...', { name, email });
+      
+      await register({ name, email, password });
+      
+      console.log('✅ Registration completed, redirecting to home...');
       navigate("/home", { replace: true });
-    } catch (_) {
-      setError("Signup failed");
+    } catch (err) {
+      console.error('❌ Registration failed:', err.message);
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,10 +112,18 @@ export default function Signup() {
         <form onSubmit={onSubmit} className="space-y-3">
           <label className="login-label" htmlFor="name">Full Name</label>
           <div className="login-input">
-            <input id="name" type="text" placeholder="Enter your full name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input 
+              id="name" 
+              type="text" 
+              placeholder="Enter your full name" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)}
+              required
+              disabled={isSubmitting || loading}
+            />
           </div>
 
-          <label className="login-label" htmlFor="email">Email</label>
+          <label className="login-label" htmlFor="email">Email Address</label>
           <div className="login-input">
             <span className="login-icon" aria-hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none">
@@ -92,17 +131,18 @@ export default function Signup() {
                 <path d="M5 8l7 4 7-4" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" />
               </svg>
             </span>
-            <input id="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input 
+              id="email" 
+              type="email" 
+              placeholder="Enter your email address" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isSubmitting || loading}
+            />
           </div>
 
-          <label className="login-label" htmlFor="phone">Phone</label>
-          <div className="login-input">
-            <input id="phone" type="tel" placeholder="Enter your phone (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} />
-          </div>
-
-          <div className="login-row">
-            <label className="login-label" htmlFor="password">Password</label>
-          </div>
+          <label className="login-label" htmlFor="password">Password</label>
           <div className="login-input">
             <span className="login-icon" aria-hidden>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none">
@@ -110,7 +150,16 @@ export default function Signup() {
                 <rect x="5" y="10" width="14" height="9" rx="2" stroke="#6B7280" strokeWidth="1.2" />
               </svg>
             </span>
-            <input id="password" type={showPassword ? "text" : "password"} placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input 
+              id="password" 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Create a password (min 6 characters)" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              disabled={isSubmitting || loading}
+            />
             <button type="button" className="visibility-toggle" aria-label="Toggle visibility" onClick={() => setShowPassword(v => !v)}>
               {showPassword ? (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none">
@@ -128,14 +177,37 @@ export default function Signup() {
 
           <label className="login-label" htmlFor="confirm">Confirm Password</label>
           <div className="login-input">
-            <input id="confirm" type={showPassword ? "text" : "password"} placeholder="Confirm your password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+            <input 
+              id="confirm" 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Confirm your password" 
+              value={confirm} 
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+              disabled={isSubmitting || loading}
+            />
           </div>
 
-          {error && (
-            <div className="login-error" role="alert">{error}</div>
+          {(error || authError) && (
+            <div className="login-error" role="alert">
+              {error || authError}
+            </div>
           )}
 
-          <button className="login-btn" type="submit">Create Account</button>
+          <button 
+            className="login-btn" 
+            type="submit"
+            disabled={isSubmitting || loading || !name || !email || !password || !confirm}
+          >
+            {isSubmitting || loading ? (
+              <>
+                <span className="loading-spinner" aria-hidden>⟳</span>
+                Creating Account...
+              </>
+            ) : (
+              "Create Account"
+            )}
+          </button>
 
           <div className="login-card-footer">
             <span>Already have an account? </span>

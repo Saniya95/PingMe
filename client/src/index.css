@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Loading spinner styles */
+.loading-spinner {
+  display: inline-block;
+  margin-right: 8px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Button disabled state */
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.login-btn:disabled:hover {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  transform: none !important;
+}
+
+/* Input disabled state */
+input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: rgba(107, 114, 128, 0.1);
+}
+
 /* Minimal base styles for pastel-ready UI */
 :root {
   color-scheme: light;

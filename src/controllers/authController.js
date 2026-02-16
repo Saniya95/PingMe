@@ -8,6 +8,11 @@ const { asyncHandler, AppError } = require("../middlewares/error.middleware");
  * @access  Public
  */
 const registerUser = asyncHandler(async (req, res) => {
+    
+  console.log("🔥 REGISTER API HIT");
+  console.log("BODY:", req.body);
+  console.log("📍 MongoDB Connection State:", require('mongoose').connection.readyState);
+    
   const { name, email, password } = req.body;
 
   // Validate input
@@ -15,19 +20,27 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new AppError("Please provide name, email, and password", 400);
   }
 
+  console.log("🔍 Checking for existing user...");
+  
   // Check if user already exists
   const existingUser = await User.findOne({ email });
+  console.log("📝 Existing user check result:", existingUser ? "User exists" : "No existing user");
 
   if (existingUser) {
     throw new AppError("User with this email already exists", 400);
   }
 
+  console.log("✨ Creating new user...");
+  
   // Create user
   const user = await User.create({
     name,
     email,
     password
   });
+  
+  console.log("✅ User created successfully with ID:", user._id);
+  console.log("💾 User saved to database:", user.email);
 
   // Generate token
   const token = generateToken(user._id);
